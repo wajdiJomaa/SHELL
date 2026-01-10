@@ -1,5 +1,10 @@
 import sys
 
+built_ins = {
+    "echo",
+    "exit",
+    "type"
+}
 
 def main():
     while True:
@@ -18,6 +23,11 @@ def main():
                 print(scanned_command[i], end=" ")
             
             print()
+        elif scanned_command[0] == "type":
+            if scanned_command[1] in built_ins:
+                print(f"{scanned_command[1]} is a shell builtin")
+            else:
+                print(f"{scanned_command[1]}: not found")
         else:
             print(f"{command}: command not found")
 
