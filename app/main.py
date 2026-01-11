@@ -5,7 +5,8 @@ import subprocess
 built_ins = {
     "echo",
     "exit",
-    "type"
+    "type",
+    "pwd"
 }
 
 def main():
@@ -24,15 +25,20 @@ def main():
             execute__echo(scanned_command)
         elif scanned_command[0] == "type":
             execute_type(scanned_command)
+        elif scanned_command[0] == "pwd":
+            print(os.getcwd())
         elif check_in_path(scanned_command[0]) is not None:
-            result = subprocess.run(scanned_command)
-            if result.stdout:
-                print(result.stdout)
-            if result.stderr:
-                print(result.stderr)
+            execute_from_path(scanned_command)
         else:
             print(f"{command}: command not found")
 
+
+def execute_from_path(scanned_command):
+    result = subprocess.run(scanned_command)
+    if result.stdout:
+        print(result.stdout)
+    if result.stderr:
+        print(result.stderr)
 
 def execute_type(scanned_command):
     if scanned_command[1] in built_ins:
