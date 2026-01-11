@@ -24,9 +24,8 @@ def main():
             execute__echo(scanned_command)
         elif scanned_command[0] == "type":
             execute_type(scanned_command)
-        elif (p := check_in_path(scanned_command[0])) is not None:
-            execution_array = [p] + (scanned_command[1:] if len(scanned_command) > 1 else [])
-            result = subprocess.run(execution_array)
+        elif check_in_path(scanned_command[0]) is not None:
+            result = subprocess.run(scanned_command)
             if result.stdout:
                 print(result.stdout)
             if result.stderr:
