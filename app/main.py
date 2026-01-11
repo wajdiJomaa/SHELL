@@ -1,4 +1,5 @@
 import sys
+import os 
 
 built_ins = {
     "echo",
@@ -17,19 +18,44 @@ def main():
         scanned_command = scan(command.strip())
 
         if scanned_command[0] == "exit":
-            sys.exit(0)
+            execute_exit()
         elif scanned_command[0] == "echo":
-            for i in range (1, len(scanned_command)):
-                print(scanned_command[i], end=" ")
-            
-            print()
+            execute__echo(scanned_command)
         elif scanned_command[0] == "type":
-            if scanned_command[1] in built_ins:
-                print(f"{scanned_command[1]} is a shell builtin")
-            else:
-                print(f"{scanned_command[1]}: not found")
+            execute_type(scanned_command)
         else:
             print(f"{command}: command not found")
+
+
+def execute_type(scanned_command):
+    if scanned_command[1] in built_ins:
+        print(f"{scanned_command[1]} is a shell builtin")
+    elif (p := check_in_path(scanned_command[1])) is not None:
+        print(f"{scanned_command[1]} is {p}")
+    else:
+        print(f"{scanned_command[1]}: not found")
+
+
+def check_in_path(command):
+    paths = os.environ.get("PATH", "").split(os.pathsep)
+    for path in paths:
+        if os.path.isdir(path) is False:
+            continue
+
+        full_path = os.path.join(path, command)
+        if os.path.isfile(full_path) and os.access(full_path, os.X_OK):
+            return full_path
+    
+    return None
+
+def execute_exit():
+    sys.exit(0)
+
+def execute__echo(scanned_command):
+    for i in range (1, len(scanned_command)):
+        print(scanned_command[i], end=" ")
+    
+    print()
 
 
 
