@@ -92,16 +92,49 @@ class SHELL:
     def execute_pwd(self, scanned_command):
         print(os.getcwd())
     
-    def execute_cd(self, scanned_command):
+    def execute_cd(self, scanned_command, current_dir=None, index=0):
+        if current_dir is None:
+            current_dir = os.getcwd()
+        scanned_command[1] = scanned_command[1][index:]
         if len(scanned_command) < 2:
+            os.chdir(os.path.expanduser("~"))
             return
+
 
         if scanned_command[1].startswith("/"):
             if os.path.isdir(scanned_command[1]):
                 os.chdir(scanned_command[1])
             else:
                 print(f"cd: {scanned_command[1]}: No such file or directory") 
+            return 
+        
+        index_slash = self.index_of_next_slash(scanned_command[1])
+        if scanned_command[1].startswith(".."):
+            new_path = os.path.dirname(current_dir)
+        elif scanned_command[1].startswith("."):
+            new_path = current_dir
+        else:
+            new_path = os.path.join(current_dir, scanned_command[1][0:index_slash if index_slash != -1 else len(scanned_command[1])])
+        
+        if os.path.isdir(new_path):
+            if index_slash == -1 or index_slash >= len(scanned_command[1]):
+                os.chdir(new_path)
+            else:
+                self.execute_cd(scanned_command, new_path, index_slash + 1)
+        else:
+            print(f"cd: {scanned_command[1]}: No such file or directory")
 
+    def index_of_next_slash(self, path):
+        is_slash = False
+        index_slash = -1
+        for i in range(len(path)):
+            if path[i] == "/":
+                is_slash = True
+                index_slash = i
+            elif is_slash is True:
+                return index_slash
+        return index_slash
+    
 if __name__ == "__main__":
     def main():
         shell = SHELL()
