@@ -1,7 +1,7 @@
 import sys
 import os 
 import subprocess
-from token import Token
+from .token import Token
 
 class SHELL:
 
