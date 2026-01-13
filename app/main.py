@@ -80,18 +80,6 @@ class SHELL:
             match command[current]:
                 case " ":
                     current += 1
-                case "'":
-                    current += 1
-                    s = ""
-                    while(current < len(command) and command[current] != "'"):
-                        s += command[current]
-                        current += 1
-
-                    if current == len(command):
-                        print("Unclosed quotation mark")
-                    
-                    current += 1
-                    result.append(Token(s, is_quoted=True))
                 case _:
                     s = ""
                     while(current < len(command) and command[current] != " "):
