@@ -95,6 +95,10 @@ class SHELL:
     def execute_cd(self, scanned_command, current_dir=None, index=0):
         if current_dir is None:
             current_dir = os.getcwd()
+        
+        if index == 0 and scanned_command[1].startswith("~"):
+            current_dir = os.path.expanduser("~")
+
         scanned_command[1] = scanned_command[1][index:]
         if len(scanned_command) < 2:
             os.chdir(os.path.expanduser("~"))
@@ -110,9 +114,15 @@ class SHELL:
         
         index_slash = self.index_of_next_slash(scanned_command[1])
         if scanned_command[1].startswith(".."):
-            new_path = os.path.dirname(current_dir)
+            if len(scanned_command[1]) > 2 and scanned_command[1][2] != "/":
+                new_path = os.path.join(current_dir, scanned_command[1][0:index_slash if index_slash != -1 else len(scanned_command[1])])
+            else:
+                new_path = os.path.dirname(current_dir)
         elif scanned_command[1].startswith("."):
-            new_path = current_dir
+            if len(scanned_command[1]) > 1 and scanned_command[1][1] != "/":
+                new_path = os.path.join(current_dir, scanned_command[1][0:index_slash if index_slash != -1 else len(scanned_command[1])])
+            else:
+                new_path = current_dir
         else:
             new_path = os.path.join(current_dir, scanned_command[1][0:index_slash if index_slash != -1 else len(scanned_command[1])])
         
