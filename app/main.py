@@ -98,7 +98,7 @@ class SHELL:
         
         if index == 0 and scanned_command[1].startswith("~"):
             current_dir = os.path.expanduser("~")
-
+            return
         scanned_command[1] = scanned_command[1][index:]
         if len(scanned_command) < 2:
             os.chdir(os.path.expanduser("~"))
