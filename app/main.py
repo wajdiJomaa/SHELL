@@ -122,16 +122,16 @@ class SHELL:
         index_slash = self.index_of_next_slash(scanned_command[1].value)
         if scanned_command[1].value.startswith(".."):
             if len(scanned_command[1].value) > 2 and scanned_command[1].value[2] != "/":
-                new_path = os.path.join(current_dir, scanned_command[1].value[0:index_slash if index_slash != -1 else len(scanned_command[1])])
+                new_path = os.path.join(current_dir, scanned_command[1].value[0:index_slash if index_slash != -1 else len(scanned_command[1].value)])
             else:
                 new_path = os.path.dirname(current_dir)
         elif scanned_command[1].value.startswith("."):
             if len(scanned_command[1].value) > 1 and scanned_command[1].value[1] != "/":
-                new_path = os.path.join(current_dir, scanned_command[1].value[0:index_slash if index_slash != -1 else len(scanned_command[1])])
+                new_path = os.path.join(current_dir, scanned_command[1].value[0:index_slash if index_slash != -1 else len(scanned_command[1].value)])
             else:
                 new_path = current_dir
         else:
-            new_path = os.path.join(current_dir, scanned_command[1].value[0:index_slash if index_slash != -1 else len(scanned_command[1])])
+            new_path = os.path.join(current_dir, scanned_command[1].value[0:index_slash if index_slash != -1 else len(scanned_command[1].value)])
         
         if os.path.isdir(new_path):
             if index_slash == -1 or index_slash >= len(scanned_command[1].value):
