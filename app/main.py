@@ -133,7 +133,8 @@ class SHELL:
     def scan(self,command):
         current = 0
         result = []
-        
+        is_quoted = False
+        is_double_quote = False
         while current < len(command):
             match command[current]:
                 case " ":
@@ -147,6 +148,7 @@ class SHELL:
                                 s += command[current]
                                 current += 1
                             current += 1
+                            is_quoted = True
                             continue
                         if command[current] == '"':
                             current += 1
@@ -154,10 +156,12 @@ class SHELL:
                                 s += command[current]
                                 current += 1
                             current += 1
+                            is_quoted = True
+                            is_double_quote = True
                             continue
                         s += command[current]
                         current += 1
-                    result.append(Token(s))
+                    result.append(Token(s, is_quoted, is_double_quote))
 
         return result
 if __name__ == "__main__":
