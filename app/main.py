@@ -145,6 +145,13 @@ class SHELL:
                 case _:
                     s = ""
                     while(current < len(command) and command[current] != " "):
+                        if command[current] == "\\":
+                            if current + 1 < len(command):
+                                s += command[current + 1]
+                                current += 2
+                            else:
+                                current += 1
+                            continue
                         if command[current] == "'":
                             current += 1
                             while(current < len(command) and command[current] != "'"):
