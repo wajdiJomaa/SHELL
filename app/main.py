@@ -71,31 +71,6 @@ class SHELL:
         print()
 
 
-
-    def scan(self,command):
-        current = 0
-        result = []
-        
-        while current < len(command):
-            match command[current]:
-                case " ":
-                    current += 1
-                case _:
-                    s = ""
-                    while(current < len(command) and command[current] != " "):
-                        if command[current] == "'":
-                            current += 1
-                            while(current < len(command) and command[current] != "'"):
-                                s += command[current]
-                                current += 1
-                            current += 1
-                            continue
-                        s += command[current]
-                        current += 1
-                    result.append(Token(s))
-
-        return result
-
     def execute_pwd(self, scanned_command):
         print(os.getcwd())
     
@@ -103,9 +78,11 @@ class SHELL:
         if current_dir is None:
             current_dir = os.getcwd()
         
-        if index == 0 and scanned_command[1].value.startswith("~"):
-            os.chdir(os.getenv('HOME'))
-            return
+        if index == 0 and scanned_command[1].value.startswith("~") and scanned_command[1].is_quoted is False:
+            index_slash = self.index_of_next_slash(scanned_command[1].value)
+            if index_slash == -1 or index_slash >= len(scanned_command[1].value):
+                os.chdir(os.getenv('HOME'))
+                return
         
         scanned_command[1].value = scanned_command[1].value[index:]
         if len(scanned_command) < 2:
@@ -151,7 +128,38 @@ class SHELL:
             elif is_slash is True:
                 return index_slash
         return index_slash
-    
+
+
+    def scan(self,command):
+        current = 0
+        result = []
+        
+        while current < len(command):
+            match command[current]:
+                case " ":
+                    current += 1
+                case _:
+                    s = ""
+                    while(current < len(command) and command[current] != " "):
+                        if command[current] == "'":
+                            current += 1
+                            while(current < len(command) and command[current] != "'"):
+                                s += command[current]
+                                current += 1
+                            current += 1
+                            continue
+                        if command[current] == '"':
+                            current += 1
+                            while(current < len(command) and command[current] != '"'):
+                                s += command[current]
+                                current += 1
+                            current += 1
+                            continue
+                        s += command[current]
+                        current += 1
+                    result.append(Token(s))
+
+        return result
 if __name__ == "__main__":
     def main():
         shell = SHELL()
