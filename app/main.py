@@ -1,7 +1,7 @@
 import sys
 import os 
 import subprocess
-from .token import Token
+from app.token import Token
 
 class SHELL:
 
@@ -24,6 +24,9 @@ class SHELL:
                 sys.exit()
             
             scanned_command = self.scan(command.strip())
+
+            if len(scanned_command) < 1:
+                continue
 
             if scanned_command[0].value in self.built_ins:
                 self.built_ins[scanned_command[0].value](scanned_command)
