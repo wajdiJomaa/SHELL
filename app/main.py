@@ -163,6 +163,11 @@ class SHELL:
                         if command[current] == '"':
                             current += 1
                             while(current < len(command) and command[current] != '"'):
+                                if command[current] == "\\":
+                                    if current + 1 < len(command):
+                                      if command[current +1] == '"' or command[current + 1] == "\\":
+                                        current += 1
+                                        
                                 s += command[current]
                                 current += 1
                             current += 1
