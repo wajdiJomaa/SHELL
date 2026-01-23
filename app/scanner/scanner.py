@@ -15,7 +15,7 @@ class Scanner:
                         result.append(Token(">", t=TokenType.REDIRECT))
                         current += 1
                     case "1":
-                        if command[current + 1] == ">":
+                        if len(command) > current + 1 and command[current + 1] == ">":
                             result.append(Token(">", t=TokenType.REDIRECT))
                             current += 2
                         else:

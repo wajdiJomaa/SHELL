@@ -42,9 +42,9 @@ class Executor:
 
     def execute_type(self, scanned_command):
         if scanned_command[1].value in self.built_ins:
-            print(f"{scanned_command[1].value} is a shell builtin")
+            print(f"{scanned_command[1].value} is a shell builtin", file=self.stdout)
         elif (p := self.check_in_path(scanned_command[1].value)) is not None:
-            print(f"{scanned_command[1].value} is {p}")
+            print(f"{scanned_command[1].value} is {p}", file=self.stdout)
         else:
             print(f"{scanned_command[1].value}: not found")
 
@@ -66,13 +66,13 @@ class Executor:
 
     def execute__echo(self, scanned_command):
         for i in range (1, len(scanned_command)):
-            print(scanned_command[i].value, end=" ")
+            print(scanned_command[i].value, end=" ", file=self.stdout)
         
-        print()
+        print(file=self.stdout)
 
 
     def execute_pwd(self, scanned_command):
-        print(os.getcwd())
+        print(os.getcwd(), file=self.stdout)
     
     def execute_cd(self, scanned_command, current_dir=None, index=0):
         if len(scanned_command) < 2:
@@ -111,6 +111,7 @@ class Executor:
         if os.path.exists(os.path.dirname(resolved_path)) is False:
             print(f"{redirect.redirect.value} No such file or directory")
             return
+
         old_stdout = self.stdout
         with open(resolved_path, "w") as f:
             try:
