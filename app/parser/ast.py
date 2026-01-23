@@ -6,9 +6,10 @@ class Command:
         return f"Command {self.command}"        
 
 class Redirect:
-    def __init__(self, command, redirect):
+    def __init__(self, command, redirect, type):
         self.command = command
         self.redirect = redirect
+        self.type = type
 
     def __repr__():
         return f"Redirect {self.command} > {self.redirect}"

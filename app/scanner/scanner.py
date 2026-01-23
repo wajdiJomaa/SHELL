@@ -21,6 +21,13 @@ class Scanner:
                         else:
                             token, current = self.scan_token(command, current)
                             result.append(token)
+                    case "2":
+                        if len(command) > current + 1 and command[current + 1] == ">":
+                            result.append(Token(">", t=TokenType.ERROR_REDIRECT))
+                            current += 2
+                        else:
+                            token, current = self.scan_token(command, current)
+                            result.append(token)
                     case _:
                         token, current = self.scan_token(command, current)
                         result.append(token)

@@ -12,14 +12,17 @@ class Parser:
     
     def parse_redirect(self):
         command = self.parse_command()
-        if self.current < len(self.tokens) and self.tokens[self.current].t == TokenType.REDIRECT:
+        
+        while self.current < len(self.tokens) and (self.tokens[self.current].t == TokenType.REDIRECT or self.tokens[self.current].t == TokenType.ERROR_REDIRECT):
             self.current += 1
             
             if self.current >= len(self.tokens):
                 raise Exception("Expected a file name")
 
-            redirect = self.tokens[self.current]
-            return Redirect(command, redirect)
+            redirect_target = self.tokens[self.current]
+            command = Redirect(command, redirect_target, self.tokens[self.current - 1].t)
+            self.current+=1
+
         return command
     
     def parse_command(self):

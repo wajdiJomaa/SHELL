@@ -2,11 +2,12 @@ import sys
 from app.parser.ast import *
 import os
 import subprocess
-
+from ..scanner.token_type import TokenType
 class Executor:
     def __init__(self, ast):
         self.ast = ast
         self.stdout = sys.stdout
+        self.stderr = sys.stderr
         self.built_ins = {
             "echo": self.execute__echo,
             "exit" : self.execute_exit,
@@ -16,10 +17,13 @@ class Executor:
         }
 
     def execute(self):
-        if isinstance(self.ast, Command):
-            self.execute_command(self.ast)
-        elif isinstance(self.ast, Redirect):
-            self.execute_redirect(self.ast)
+        self._execute(self.ast)
+
+    def _execute(self, ast):
+        if isinstance(ast, Command):
+            self.execute_command(ast)
+        elif isinstance(ast, Redirect):
+            self.execute_redirect(ast)
 
     def execute_command(self, command):
         if len(command.command) < 1:
@@ -30,11 +34,11 @@ class Executor:
         elif self.check_in_path(command.command[0].value) is not None:
             self.execute_from_path(list(map(lambda token: token.value, command.command)))
         else:
-            print(f"{command.command[0].value}: command not found")
+            print(f"{command.command[0].value}: command not found", file=self.stderr)
 
 
     def execute_from_path(self, scanned_command):
-        result = subprocess.run(scanned_command, stdout=self.stdout)
+        result = subprocess.run(scanned_command, stdout=self.stdout, stderr=self.stderr)
         if result.stdout:
             print(result.stdout)
         if result.stderr:
@@ -46,7 +50,7 @@ class Executor:
         elif (p := self.check_in_path(scanned_command[1].value)) is not None:
             print(f"{scanned_command[1].value} is {p}", file=self.stdout)
         else:
-            print(f"{scanned_command[1].value}: not found")
+            print(f"{scanned_command[1].value}: not found", file=self.stderr)
 
 
     def check_in_path(self,command):
@@ -87,7 +91,7 @@ class Executor:
         if os.path.isdir(resolved_path):
             os.chdir(resolved_path)
         else:
-            print(f"cd: {scanned_command[1].value}: No such file or directory")
+            print(f"cd: {scanned_command[1].value}: No such file or directory", file=self.stderr)
 
     def index_of_next_slash(self, path):
         is_slash = False
@@ -105,21 +109,30 @@ class Executor:
     def execute_redirect(self, redirect):
         resolved_path = self.resolve_path(redirect.redirect.value)
         if os.path.isdir(resolved_path):
-            print(f"{redirect.redirect.value}: Is a directory")
+            print(f"{redirect.redirect.value}: Is a directory", file=self.stderr)
             return
         
         if os.path.exists(os.path.dirname(resolved_path)) is False:
-            print(f"{redirect.redirect.value} No such file or directory")
+            print(f"{redirect.redirect.value} No such file or directory", file=self.stderr)
             return
 
-        old_stdout = self.stdout
-        with open(resolved_path, "w") as f:
-            try:
-                self.stdout = f
-                self.execute_command(redirect.command)
-            finally:
-                self.stdout = old_stdout
+        if redirect.type == TokenType.REDIRECT:    
+            old_stdout = self.stdout
+            with open(resolved_path, "w") as f:
+                try:
+                    self.stdout = f
+                    self._execute(redirect.command)
+                finally:
+                    self.stdout = old_stdout
         
+        elif redirect.type == TokenType.ERROR_REDIRECT:
+            old_stderr = self.stderr
+            with open(resolved_path, "w") as f:
+                try:
+                    self.stderr = f
+                    self._execute(redirect.command)
+                finally:
+                    self.stderr = old_stderr
     def resolve_path(self, path, current_dir=None, index=0):
         if current_dir is None:
             current_dir = os.getcwd()
