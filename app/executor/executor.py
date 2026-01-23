@@ -6,6 +6,7 @@ import subprocess
 class Executor:
     def __init__(self, ast):
         self.ast = ast
+        self.stdout = sys.stdout
         self.built_ins = {
             "echo": self.execute__echo,
             "exit" : self.execute_exit,
@@ -33,7 +34,7 @@ class Executor:
 
 
     def execute_from_path(self, scanned_command):
-        result = subprocess.run(scanned_command)
+        result = subprocess.run(scanned_command, stdout=self.stdout)
         if result.stdout:
             print(result.stdout)
         if result.stderr:
@@ -74,46 +75,17 @@ class Executor:
         print(os.getcwd())
     
     def execute_cd(self, scanned_command, current_dir=None, index=0):
-        if current_dir is None:
-            current_dir = os.getcwd()
-        
-        if index == 0 and scanned_command[1].value.startswith("~") and scanned_command[1].is_quoted is False:
-            index_slash = self.index_of_next_slash(scanned_command[1].value)
-            if index_slash == -1 or index_slash >= len(scanned_command[1].value):
-                os.chdir(os.getenv('HOME'))
-                return
-        
-        scanned_command[1].value = scanned_command[1].value[index:]
         if len(scanned_command) < 2:
             os.chdir(os.getenv('HOME'))
             return
+        
+        if scanned_command[1].value.strip() == "":
+            os.chdir(os.getcwd())
+            return
 
-        if scanned_command[1].value.startswith("/"):
-            if os.path.isdir(scanned_command[1].value):
-                os.chdir(scanned_command[1].value)
-            else:
-                print(f"cd: {scanned_command[1].value}: No such file or directory") 
-            return 
-        
-        index_slash = self.index_of_next_slash(scanned_command[1].value)
-        if scanned_command[1].value.startswith(".."):
-            if len(scanned_command[1].value) > 2 and scanned_command[1].value[2] != "/":
-                new_path = os.path.join(current_dir, scanned_command[1].value[0:index_slash if index_slash != -1 else len(scanned_command[1].value)])
-            else:
-                new_path = os.path.dirname(current_dir)
-        elif scanned_command[1].value.startswith("."):
-            if len(scanned_command[1].value) > 1 and scanned_command[1].value[1] != "/":
-                new_path = os.path.join(current_dir, scanned_command[1].value[0:index_slash if index_slash != -1 else len(scanned_command[1].value)])
-            else:
-                new_path = current_dir
-        else:
-            new_path = os.path.join(current_dir, scanned_command[1].value[0:index_slash if index_slash != -1 else len(scanned_command[1].value)])
-        
-        if os.path.isdir(new_path):
-            if index_slash == -1 or index_slash >= len(scanned_command[1].value):
-                os.chdir(new_path)
-            else:
-                self.execute_cd(scanned_command, new_path, index_slash + 1)
+        resolved_path = self.resolve_path(scanned_command[1].value)
+        if os.path.isdir(resolved_path):
+            os.chdir(resolved_path)
         else:
             print(f"cd: {scanned_command[1].value}: No such file or directory")
 
@@ -131,10 +103,52 @@ class Executor:
 
     
     def execute_redirect(self, redirect):
-        with open(redirect.redirect.value, "w") as f:
-            old_stdout = sys.stdout
-            sys.stdout = f
+        resolved_path = self.resolve_path(redirect.redirect.value)
+        if os.path.isdir(resolved_path):
+            print(f"{redirect.redirect.value}: Is a directory")
+            return
+        
+        if os.path.exists(os.path.dirname(resolved_path)) is False:
+            print(f"{redirect.redirect.value} No such file or directory")
+            return
+        old_stdout = self.stdout
+        with open(resolved_path, "w") as f:
             try:
+                self.stdout = f
                 self.execute_command(redirect.command)
             finally:
-                sys.stdout = old_stdout
+                self.stdout = old_stdout
+        
+    def resolve_path(self, path, current_dir=None, index=0):
+        if current_dir is None:
+            current_dir = os.getcwd()
+
+        if index >= len(path):
+            return current_dir
+
+        if path.startswith("/"):
+            return path
+
+        path = path[index:]
+        
+        index_slash = self.index_of_next_slash(path)
+        if path.startswith(".."):
+            if len(path) > 2 and path[2] != "/":
+                new_path = os.path.join(current_dir, path[0:index_slash if index_slash != -1 else len(path)])
+            else:
+                new_path = os.path.dirname(current_dir)
+        elif path.startswith("."):
+            if len(path) > 1 and path[1] != "/":
+                new_path = os.path.join(current_dir, path[0:index_slash if index_slash != -1 else len(path)])
+            else:
+                new_path = current_dir
+
+        elif index == 0 and path.startswith("~"):
+            if len(path) > 1 and path[1] != "/":
+                new_path = os.path.join(current_dir, path[0:index_slash if index_slash != -1 else len(path)])
+            else:
+                new_path = os.getenv('HOME')
+        else:
+            new_path = os.path.join(current_dir, path[0:index_slash if index_slash != -1 else len(path)])
+        
+        return self.resolve_path(path, new_path, index_slash + 1 if index_slash != -1 else len(path))
