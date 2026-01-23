@@ -14,6 +14,13 @@ class Scanner:
                     case ">":
                         result.append(Token(">", t=TokenType.REDIRECT))
                         current += 1
+                    case "1":
+                        if command[current + 1] == ">":
+                            result.append(Token(">", t=TokenType.REDIRECT))
+                            current += 2
+                        else:
+                            token, current = self.scan_token(command, current)
+                            result.append(token)
                     case _:
                         token, current = self.scan_token(command, current)
                         result.append(token)
