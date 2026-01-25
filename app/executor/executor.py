@@ -126,7 +126,7 @@ class Executor:
                 finally:
                     self.stdout = old_stdout
         
-        elif redirect.type == TokenType.ERROR_REDIRECT or redirect.type == TokenType.ERROR_REDIRECT_APPEND:
+        elif redirect.type == TokenType.ERROR_REDIRECT or redirect.type == TokenType.REDIRECT_ERROR_APPEND:
             old_stderr = self.stderr
             mode = "w" if redirect.type == TokenType.ERROR_REDIRECT else "a"
             with open(resolved_path, mode) as f:
