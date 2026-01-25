@@ -26,7 +26,7 @@ def complete(text, state):
         completions = built_in_complete(text)
         completions.extend(complete_from_path(text))
         if len(completions) == 1:
-            completions[1] = completions[1] + " "
+            completions[0] = completions[0] + " "
     if state < len(completions):
         return completions[state]
    
