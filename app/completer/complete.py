@@ -2,7 +2,7 @@ from app.builtins import built_ins
 import os
 
 def built_in_complete(text):
-    return [built_in + " " for built_in in built_ins if built_in.startswith(text)]
+    return [built_in for built_in in built_ins if built_in.startswith(text)]
 
 def complete_from_path(text):
     completions = []
@@ -13,7 +13,7 @@ def complete_from_path(text):
 
         for file in os.listdir(path):
             if file.startswith(text):
-                completions.append(file + " ")
+                completions.append(file)
     
     return completions
 
@@ -25,7 +25,8 @@ def complete(text, state):
     if state == 0:
         completions = built_in_complete(text)
         completions.extend(complete_from_path(text))
-    
+        if len(completions) == 1:
+            completions[1] = completions[1] + " "
     if state < len(completions):
         return completions[state]
    
