@@ -18,17 +18,20 @@ def complete_from_path(text):
     return completions
 
 
-completions = []
+completions = set()
 
 def complete(text, state):
     global completions
+   
     if state == 0:
-        completions = built_in_complete(text)
-        completions.extend(complete_from_path(text))
+        completions.clear()
+        completions.update(built_in_complete(text))
+        completions.update(complete_from_path(text))
         if len(completions) == 1:
-            completions[0] = completions[0] + " "
+            completions.add(completions.pop() + " ")
+
     if state < len(completions):
-        return completions[state]
+        return list(completions)[state]
    
     return None
 
