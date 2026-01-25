@@ -13,7 +13,8 @@ class Parser:
     def parse_redirect(self):
         command = self.parse_command()
         
-        while self.current < len(self.tokens) and (self.tokens[self.current].t == TokenType.REDIRECT or self.tokens[self.current].t == TokenType.ERROR_REDIRECT):
+        while self.current < len(self.tokens) and (self.tokens[self.current].t == TokenType.REDIRECT or self.tokens[self.current].t == TokenType.ERROR_REDIRECT 
+                                    or self.tokens[self.current].t == TokenType.REDIRECT_APPEND or self.tokens[self.current].t == TokenType.ERROR_REDIRECT_APPEND):
             self.current += 1
             
             if self.current >= len(self.tokens):

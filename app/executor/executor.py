@@ -116,18 +116,20 @@ class Executor:
             print(f"{redirect.redirect.value} No such file or directory", file=self.stderr)
             return
 
-        if redirect.type == TokenType.REDIRECT:    
+        if redirect.type == TokenType.REDIRECT or redirect.type == TokenType.REDIRECT_APPEND:    
             old_stdout = self.stdout
-            with open(resolved_path, "w") as f:
+            mode = "w" if redirect.type == TokenType.REDIRECT else "a"
+            with open(resolved_path, mode) as f:
                 try:
                     self.stdout = f
                     self._execute(redirect.command)
                 finally:
                     self.stdout = old_stdout
         
-        elif redirect.type == TokenType.ERROR_REDIRECT:
+        elif redirect.type == TokenType.ERROR_REDIRECT or redirect.type == TokenType.ERROR_REDIRECT_APPEND:
             old_stderr = self.stderr
-            with open(resolved_path, "w") as f:
+            mode = "w" if redirect.type == TokenType.ERROR_REDIRECT else "a"
+            with open(resolved_path, mode) as f:
                 try:
                     self.stderr = f
                     self._execute(redirect.command)

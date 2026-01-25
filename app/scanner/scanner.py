@@ -12,19 +12,31 @@ class Scanner:
                     case " ":
                         current += 1
                     case ">":
-                        result.append(Token(">", t=TokenType.REDIRECT))
-                        current += 1
+                        if len(command) > current + 1 and command[current + 1] == ">":
+                            result.append(Token(">>", t=TokenType.REDIRECT_APPEND))
+                            current += 2
+                        else:
+                            result.append(Token(">", t=TokenType.REDIRECT))
+                            current += 1
                     case "1":
                         if len(command) > current + 1 and command[current + 1] == ">":
-                            result.append(Token(">", t=TokenType.REDIRECT))
-                            current += 2
+                            if len(command) > current + 2 and command[current + 2] == ">":
+                                result.append(Token(">>", t=TokenType.REDIRECT_APPEND))
+                                current += 3
+                            else:
+                                result.append(Token(">", t=TokenType.REDIRECT))
+                                current += 2
                         else:
                             token, current = self.scan_token(command, current)
                             result.append(token)
                     case "2":
                         if len(command) > current + 1 and command[current + 1] == ">":
-                            result.append(Token(">", t=TokenType.ERROR_REDIRECT))
-                            current += 2
+                            if len(command) > current + 2 and command[current + 2] == ">":
+                                result.append(Token(">", t=TokenType.ERROR_REDIRECT_APPEND))
+                                current += 3
+                            else:
+                                result.append(Token(">", t=TokenType.ERROR_REDIRECT))
+                                current += 2
                         else:
                             token, current = self.scan_token(command, current)
                             result.append(token)

@@ -4,12 +4,12 @@ import subprocess
 from app.scanner.scanner import Scanner
 from app.parser.parser import Parser
 from app.executor.executor import Executor
+import readline
 class SHELL: 
     def run(self):
         while True:
-            sys.stdout.write("$ ")
             try:
-                command = input()
+                command = input("$ ")
             except EOFError:
                 sys.exit()
             
