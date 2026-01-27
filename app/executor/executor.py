@@ -194,8 +194,6 @@ class Executor:
 
             os.close(r)
             data = data.decode("utf-8")
-            data = data.strip()
-            data = data.strip("\n")
             
             if isinstance(pipe.right, Redirect):
                 pipe.right.command.stdin = data
