@@ -3,6 +3,7 @@ from app.parser.ast import *
 import os
 import subprocess
 from ..scanner.token_type import TokenType
+from ..scanner.token import Token
 class Executor:
     def __init__(self, ast):
         self.ast = ast
@@ -24,6 +25,8 @@ class Executor:
             self.execute_command(ast)
         elif isinstance(ast, Redirect):
             self.execute_redirect(ast)
+        elif isinstance(ast, Pipe):
+            self.execute_pipe(ast)
 
     def execute_command(self, command):
         if len(command.command) < 1:
@@ -32,13 +35,13 @@ class Executor:
         if command.command[0].value in self.built_ins:
             self.built_ins[command.command[0].value](command.command)
         elif self.check_in_path(command.command[0].value) is not None:
-            self.execute_from_path(list(map(lambda token: token.value, command.command)))
+            self.execute_from_path(list(map(lambda token: token.value, command.command)), command.stdin)
         else:
             print(f"{command.command[0].value}: command not found", file=self.stderr)
 
 
-    def execute_from_path(self, scanned_command):
-        result = subprocess.run(scanned_command, stdout=self.stdout, stderr=self.stderr)
+    def execute_from_path(self, scanned_command, stdin=None):
+        result = subprocess.run(scanned_command, input=stdin, stdout=self.stdout, stderr=self.stderr, text=True)
         if result.stdout:
             print(result.stdout)
         if result.stderr:
@@ -168,3 +171,37 @@ class Executor:
             new_path = os.path.join(current_dir, path[0:index_slash if index_slash != -1 else len(path)])
         
         return self.resolve_path(path, new_path, index_slash + 1 if index_slash != -1 else len(path))
+
+
+    def execute_pipe(self, pipe):
+        r,w = os.pipe()
+
+        pid = os.fork()
+        if pid == 0:
+            os.close(r)
+            with os.fdopen(w, "w") as f:
+                self.stdout = f
+                self._execute(pipe.left)
+            exit(0)
+        else:            
+            os.close(w)
+            data = b""
+            while True:
+                chunk = os.read(r, 4096)
+                if not chunk:
+                    break
+                data += chunk
+
+            os.close(r)
+            data = data.decode("utf-8")
+            data = data.strip()
+            data = data.strip("\n")
+            
+            if isinstance(pipe.right, Redirect):
+                pipe.right.command.stdin = data
+            elif isinstance(pipe.right, Command):
+                pipe.right.stdin = data
+
+            self._execute(pipe.right)
+         
+            

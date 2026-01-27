@@ -4,3 +4,7 @@ class Token:
         self.is_quoted = is_quoted
         self.is_double_quote = is_double_quote
         self.t = t 
+
+    
+    def __repr__(self):
+        return self.value

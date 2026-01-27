@@ -1,6 +1,6 @@
 from app.scanner.token import Token
 from app.scanner.token_type import TokenType
-from .ast import Command, Redirect
+from .ast import Command, Redirect, Pipe
 
 class Parser:
     def __init__(self, tokens):
@@ -8,8 +8,21 @@ class Parser:
         self.current = 0
 
     def parse(self):
-        return self.parse_redirect()
+        return self.parse_pipe()
     
+    def parse_pipe(self):
+        command = self.parse_redirect()
+
+        while self.current < len(self.tokens) and self.tokens[self.current].t == TokenType.PIPE:
+            self.current += 1
+
+            if self.current >= len(self.tokens):
+                raise Exception("Expected a command")
+
+            command = Pipe(command, self.parse_redirect())
+
+        return command
+
     def parse_redirect(self):
         command = self.parse_command()
         

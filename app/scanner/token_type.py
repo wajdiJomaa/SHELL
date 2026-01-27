@@ -6,3 +6,4 @@ class TokenType(Enum):
     ERROR_REDIRECT = auto()
     REDIRECT_APPEND = auto()
     REDIRECT_ERROR_APPEND = auto()
+    PIPE = auto()

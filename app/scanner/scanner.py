@@ -11,6 +11,9 @@ class Scanner:
                 match command[current]:
                     case " ":
                         current += 1
+                    case "|":
+                        result.append(Token("|", t=TokenType.PIPE))
+                        current += 1
                     case ">":
                         if len(command) > current + 1 and command[current + 1] == ">":
                             result.append(Token(">>", t=TokenType.REDIRECT_APPEND))
