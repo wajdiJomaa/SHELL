@@ -5,7 +5,8 @@ import subprocess
 from ..scanner.token_type import TokenType
 from ..scanner.token import Token
 class Executor:
-    def __init__(self, ast):
+    def __init__(self, ast, hist):
+        self.history = hist
         self.ast = ast
         self.stdout = sys.stdout
         self.stderr = sys.stderr
@@ -15,7 +16,8 @@ class Executor:
             "exit" : self.execute_exit,
             "type" : self.execute_type,
             "pwd" : self.execute_pwd,
-            "cd": self.execute_cd
+            "cd": self.execute_cd,
+            "history": self.execute_history
         }
 
     def execute(self):
@@ -190,3 +192,10 @@ class Executor:
             with os.fdopen(r, "r") as f:
                 self.stdin = f
                 self._execute(pipe.right)
+
+    
+    def execute_history(self, _):
+        hist = self.history.get()
+
+        for i in range(len(hist)):
+            print(f"    {i + 1} {hist[i]}", file=self.stdout)
