@@ -194,8 +194,16 @@ class Executor:
                 self._execute(pipe.right)
 
     
-    def execute_history(self, _):
+    def execute_history(self, scanned_command):
         hist = self.history.get()
-
-        for i in range(len(hist)):
+        n = len(hist)
+        
+        if len(scanned_command) > 1:
+            n = int(scanned_command[1].value)
+        
+        n = len(hist) - n
+        if n < 0:
+            n = 0
+        
+        for i in range(n, len(hist)):
             print(f"    {i + 1} {hist[i]}", file=self.stdout)
