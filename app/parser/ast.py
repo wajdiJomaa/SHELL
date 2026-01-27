@@ -1,7 +1,6 @@
 class Command:
-    def __init__(self, command, stdin = None):
+    def __init__(self, command):
         self.command = command
-        self.stdin = None
 
     def __repr__():
         return f"Command {self.command}"        

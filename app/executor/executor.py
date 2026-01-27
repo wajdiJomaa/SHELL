@@ -9,6 +9,7 @@ class Executor:
         self.ast = ast
         self.stdout = sys.stdout
         self.stderr = sys.stderr
+        self.stdin = sys.stdin
         self.built_ins = {
             "echo": self.execute__echo,
             "exit" : self.execute_exit,
@@ -35,13 +36,13 @@ class Executor:
         if command.command[0].value in self.built_ins:
             self.built_ins[command.command[0].value](command.command)
         elif self.check_in_path(command.command[0].value) is not None:
-            self.execute_from_path(list(map(lambda token: token.value, command.command)), command.stdin)
+            self.execute_from_path(list(map(lambda token: token.value, command.command)))
         else:
             print(f"{command.command[0].value}: command not found", file=self.stderr)
 
 
-    def execute_from_path(self, scanned_command, stdin=None):
-        result = subprocess.run(scanned_command, input=stdin, stdout=self.stdout, stderr=self.stderr, text=True)
+    def execute_from_path(self, scanned_command):
+        result = subprocess.run(scanned_command, stdin=self.stdin, stdout=self.stdout, stderr=self.stderr)
         if result.stdout:
             print(result.stdout)
         if result.stderr:
@@ -185,21 +186,7 @@ class Executor:
             exit(0)
         else:            
             os.close(w)
-            data = b""
-            while True:
-                chunk = os.read(r, 4096)
-                if not chunk:
-                    break
-                data += chunk
-
-            os.close(r)
-            data = data.decode("utf-8")
-            
-            if isinstance(pipe.right, Redirect):
-                pipe.right.command.stdin = data
-            elif isinstance(pipe.right, Command):
-                pipe.right.stdin = data
-
-            self._execute(pipe.right)
-         
-            
+            old_stdin = self.stdin
+            with os.fdopen(r, "r") as f:
+                self.stdin = f
+                self._execute(pipe.right)
