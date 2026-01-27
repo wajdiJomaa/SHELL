@@ -74,7 +74,7 @@ class Executor:
 
     def execute__echo(self, scanned_command):
         for i in range (1, len(scanned_command)):
-            print(scanned_command[i].value, end=" ", file=self.stdout)
+            print(scanned_command[i].value, end=" " if i < len(scanned_command) - 1 else "", file=self.stdout)
         
         print(file=self.stdout)
 
