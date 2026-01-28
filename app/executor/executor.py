@@ -219,6 +219,15 @@ class Executor:
                         for line in hist:
                             f.write(line + "\n")
                     return 
+            
+            elif scanned_command[1].value == "-a":
+                if len(scanned_command) > 2:
+                    path = self.resolve_path(scanned_command[2].value)
+                    with open(path, "a") as f:
+                        for line in self.history.append_history:
+                            f.write(line + "\n")
+                    self.history.clear()
+                    return 
 
         n = len(hist) - n
         if n < 0:
