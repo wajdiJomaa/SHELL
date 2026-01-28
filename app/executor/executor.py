@@ -199,8 +199,18 @@ class Executor:
         n = len(hist)
         
         if len(scanned_command) > 1:
-            n = int(scanned_command[1].value)
-        
+            if scanned_command[1].value.isdigit() is True:
+                n = int(scanned_command[1].value)
+            
+            elif scanned_command[1].value == "-r":
+                if len(scanned_command) > 2:
+                    path = self.resolve_path(scanned_command[2].value)
+                    if os.path.isfile(path):
+                        with open(path, "r") as f:
+                            for line in f:
+                                if line.strip() != "":
+                                    self.history.add(line)
+                    return 
         n = len(hist) - n
         if n < 0:
             n = 0
