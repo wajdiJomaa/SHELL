@@ -34,7 +34,7 @@ No external dependencies are required. The shell relies on Python's standard lib
 Clone the repository:
 
 ```bash
-git clone <repository-url>
+git clone https://github.com/wajdiJomaa/SHELL.git
 cd SHELL
 ```
 
