@@ -211,6 +211,16 @@ class Executor:
                                 if line.strip(' \n') != "":
                                     self.history.add(line.strip(' \n'))
                     return 
+
+            elif scanned_command[1].value == "-w":
+                if len(scanned_command) > 2:
+                    path = self.resolve_path(scanned_command[2].value)
+                    if os.path.isfile(path):
+                        with open(path, "w") as f:
+                            for line in hist:
+                                f.write(line + "\n")
+                    return 
+
         n = len(hist) - n
         if n < 0:
             n = 0
