@@ -215,10 +215,9 @@ class Executor:
             elif scanned_command[1].value == "-w":
                 if len(scanned_command) > 2:
                     path = self.resolve_path(scanned_command[2].value)
-                    if os.path.isfile(path):
-                        with open(path, "w") as f:
-                            for line in hist:
-                                f.write(line + "\n")
+                    with open(path, "w") as f:
+                        for line in hist:
+                            f.write(line + "\n")
                     return 
 
         n = len(hist) - n
