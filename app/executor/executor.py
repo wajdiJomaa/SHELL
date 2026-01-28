@@ -72,8 +72,13 @@ class Executor:
         return None
 
     def execute_exit(self, _):
+        histfile = os.environ.get("HISTFILE", None)
+        if histfile is not None:
+            with open(histfile, "a") as f:
+                for line in self.history.history:
+                    f.write(line + "\n")
         sys.exit(0)
-
+                    
     def execute__echo(self, scanned_command):
         for i in range (1, len(scanned_command)):
             print(scanned_command[i].value, end=" " if i < len(scanned_command) - 1 else "", file=self.stdout)

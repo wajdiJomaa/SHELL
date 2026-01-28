@@ -14,6 +14,13 @@ class SHELL:
         readline.parse_and_bind("tab: complete")
         hist = History()
 
+        histfile = os.environ.get("HISTFILE", None)
+        if histfile is not None:
+            with open(histfile, "r") as f:
+                for line in f:
+                    if line.strip(" \n")!="":
+                        hist.add(line.strip(" \n"))
+
         while True:
             try:
                 command = input("$ ")
