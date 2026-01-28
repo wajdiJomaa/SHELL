@@ -208,8 +208,8 @@ class Executor:
                     if os.path.isfile(path):
                         with open(path, "r") as f:
                             for line in f:
-                                if line.strip() != "":
-                                    self.history.add(line)
+                                if line.strip(' \n') != "":
+                                    self.history.add(line.strip(' \n'))
                     return 
         n = len(hist) - n
         if n < 0:
