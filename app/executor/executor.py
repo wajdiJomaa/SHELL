@@ -75,7 +75,7 @@ class Executor:
         histfile = os.environ.get("HISTFILE", None)
         if histfile is not None:
             with open(histfile, "a") as f:
-                for line in self.history.history:
+                for line in self.history.session_history:
                     f.write(line + "\n")
         sys.exit(0)
                     

@@ -19,7 +19,7 @@ class SHELL:
             with open(histfile, "r") as f:
                 for line in f:
                     if line.strip(" \n")!="":
-                        hist.add(line.strip(" \n"))
+                        hist.add(line.strip(" \n"), on_startup=True)
 
         while True:
             try:
